@@ -59,7 +59,15 @@ public class LDAPManager {
         env.put(Context.PROVIDER_URL, "ldap://localhost:10389");
         env.put(Context.SECURITY_AUTHENTICATION, "simple");
         env.put(Context.SECURITY_PRINCIPAL, "uid=admin,ou=system");
-        env.put(Context.SECURITY_CREDENTIALS, "secret");
+        
+        // Retrieve credentials from environment variable instead of hardcoding
+        String ldapPassword = System.getenv("LDAP_ADMIN_PASSWORD");
+        if (ldapPassword == null || ldapPassword.isEmpty()) {
+            // Fallback to system property for backward compatibility
+            ldapPassword = System.getProperty("ldap.admin.password", "secret");
+        }
+        env.put(Context.SECURITY_CREDENTIALS, ldapPassword);
+        
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         return env;
     }
