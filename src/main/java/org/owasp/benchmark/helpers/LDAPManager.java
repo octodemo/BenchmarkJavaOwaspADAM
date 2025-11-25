@@ -62,9 +62,16 @@ public class LDAPManager {
         
         // Retrieve credentials from environment variable instead of hardcoding
         String ldapPassword = System.getenv("LDAP_ADMIN_PASSWORD");
-        if (ldapPassword == null || ldapPassword.isEmpty()) {
+        if (ldapPassword == null || ldapPassword.trim().isEmpty()) {
             // Fallback to system property for backward compatibility
-            ldapPassword = System.getProperty("ldap.admin.password", "secret");
+            ldapPassword = System.getProperty("ldap.admin.password");
+            if (ldapPassword == null || ldapPassword.trim().isEmpty()) {
+                // Last resort fallback for test environments only
+                System.err.println(
+                        "WARNING: Using default LDAP password. "
+                                + "Set LDAP_ADMIN_PASSWORD environment variable or ldap.admin.password system property for secure configuration.");
+                ldapPassword = "secret";
+            }
         }
         env.put(Context.SECURITY_CREDENTIALS, ldapPassword);
         
